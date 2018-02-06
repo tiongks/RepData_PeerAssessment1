@@ -108,22 +108,8 @@ nrow(all_activities[is.na(all_activities$steps),])
 ```
 
 ```r
-# replace all NA's with zero and store it in a new data frame
+# replace all NA's with the mean of steps and store it in a new data frame
 no_nas <- all_activities
-head(no_nas)
-```
-
-```
-##   steps       date interval
-## 1    NA 2012-10-01        0
-## 2    NA 2012-10-01        5
-## 3    NA 2012-10-01       10
-## 4    NA 2012-10-01       15
-## 5    NA 2012-10-01       20
-## 6    NA 2012-10-01       25
-```
-
-```r
 no_nas[is.na(no_nas)] <- mean(no_nas$steps, na.rm = TRUE)
 head(no_nas)
 ```
@@ -139,12 +125,15 @@ head(no_nas)
 ```
 
 ```r
+# re-compute the sum of steps per day
 no_nas_per_day <- aggregate(list(steps = no_nas$steps), list(date = no_nas$date), FUN=sum)
 gn <- ggplot(data = no_nas_per_day)
 gn + geom_histogram(aes(x = steps), fill = "blue", color="red", bins =25) + labs(x = "steps per day")
 ```
 
-![](PA1_template_files/figure-html/missing values-1.png)<!-- -->
+![](PA1_template_files/figure-html/missing_values-1.png)<!-- -->
+
+### Summary with missing values replaced with mean
 
 ```r
 summary(no_nas_per_day$steps)
@@ -153,6 +142,18 @@ summary(no_nas_per_day$steps)
 ```
 ##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
 ##      41    9819   10766   10766   12811   21194
+```
+
+### Original Summary values
+
+```r
+summary(steps_per_day$steps)
+```
+
+```
+##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+##      41    8841   10765   10766   13294   21194
+```
 ```
 
 
