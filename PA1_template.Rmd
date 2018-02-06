@@ -31,14 +31,12 @@ summary(activity)
 
 ## What is mean total number of steps taken per day?
 
-```{r total steps}
+```{r total_steps}
 mean(activity$steps, na.rm = TRUE )
 ```
 
-```{r steps per day}
+```{r steps_per_day}
 # summarize the steps by day
-# steps_per_day <- setNames(aggregate(activity$steps, by=list(date=activity$date), FUN=sum), c("date", "steps"))
-# steps_per_day <- setNames(aggregate(activity$steps ~ activity$date, FUN=sum), c("date", "steps"))
 steps_per_day <- aggregate(list(steps = activity$steps), list(date = activity$date), FUN=sum)
 gs <- ggplot(steps_per_day)
 gs + geom_histogram(aes(x = steps), fill = "blue", color="green", bins =25) + labs(x = "steps per day")
@@ -47,7 +45,7 @@ summary(steps_per_day$steps)
 
 ## What is the average daily activity pattern?
 
-```{r daily activity pattern}
+```{r daily_activity_pattern}
 average_steps_per_day <- aggregate(list(steps = activity$steps), list(date = activity$date), FUN=mean)
 ga <- ggplot(data = average_steps_per_day)
 ga + geom_line(aes(x = date, y = steps), color = "blue") + 
@@ -58,8 +56,30 @@ activity[activity$steps == max(activity$steps, na.rm = TRUE), ]
 ## Imputing missing values
 
 ```{r missing values}
-nrow(all_activities[is.na("steps"),])
+nrow(all_activities[is.na(all_activities$steps),])
+
+# replace all NA's with zero and store it in a new data frame
+no_nas <- all_activities
+head(no_nas)
+no_nas[is.na(no_nas)] <- mean(no_nas$steps, na.rm = TRUE)
+head(no_nas)
+no_nas_per_day <- aggregate(list(steps = no_nas$steps), list(date = no_nas$date), FUN=sum)
+gn <- ggplot(data = no_nas_per_day)
+gn + geom_histogram(aes(x = steps), fill = "blue", color="red", bins =25) + labs(x = "steps per day")
+summary(no_nas_per_day$steps)
 ```
 
 
 ## Are there differences in activity patterns between weekdays and weekends?
+
+```{r plot_weekends}
+activity$weekday <- as.character(lapply(strftime(activity$date, format = "%w"), 
+                           FUN = function(x) { if (x >= 1 && x <= 5) c("weekday") else c("weekend")}))
+average_steps_per_interval <- aggregate(list(ave_steps = activity$steps), list(interval = activity$interval, weekday = activity$weekday), FUN=mean)
+
+summary(average_steps_per_interval)
+table(average_steps_per_interval$weekday)
+
+gw <- ggplot(data = average_steps_per_interval, aes(x = interval, y = ave_steps, color=weekday))
+gw + geom_line() + facet_grid(weekday ~ .)
+```
